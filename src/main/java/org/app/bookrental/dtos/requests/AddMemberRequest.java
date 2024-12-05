@@ -6,7 +6,7 @@ import lombok.Data;
 public class AddMemberRequest {
 
     private String fullName;
-    private String email = "twinebravo@gmail.com";
+    private String email;
     private String password;
     private String phoneNumber;
     private String address;

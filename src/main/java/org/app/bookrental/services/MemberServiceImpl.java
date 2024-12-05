@@ -30,11 +30,18 @@ public class MemberServiceImpl implements MemberService {
     }
 
     @Override
+    public AddMemberResponse emailCannotBeEmpty(AddMemberRequest addMemberRequest) {
+        //Member getMember = findMemberByEmail(addMemberRequest.getEmail());
+        if (addMemberRequest.getEmail() == null) {
+            throw new IllegalArgumentException("Email cannot be empty");
+        }
+        return null;
+    }
+
+
+    @Override
     public AddMemberResponse registerMember(AddMemberRequest addMemberRequest) {
         Member getMember = findMemberByEmail(addMemberRequest.getEmail());
-        if (addMemberRequest.getEmail() == null){
-            throw new IllegalArgumentException("Email cannot be empty");
-        } else
         if(getMember == null) {
             Member member = new Member();
             member.setFullName(addMemberRequest.getFullName());
@@ -42,19 +49,17 @@ public class MemberServiceImpl implements MemberService {
             member.setPassword(addMemberRequest.getPassword());
             member.setPhoneNumber(addMemberRequest.getPhoneNumber());
             member.setAddress(addMemberRequest.getAddress());
-            //memberRepository.save(member);
+            memberRepository.save(member);
         }
-            AddMemberResponse regResponse = new AddMemberResponse();
-            regResponse.setRegMsg("Registration successful");
-            return regResponse;
-
-
+        AddMemberResponse regResponse = new AddMemberResponse();
+        regResponse.setRegMsg("Registration successful");
+        return regResponse;
     }
 
     @Override
-    public Member loginUsername(LoginRequest loginRequest) {
+    public Member loginEmail(LoginRequest loginRequest) {
         Member foundMember = findMemberByEmail(loginRequest.getEmail());
-        if (foundMember.getEmail() == null) {
+        if (foundMember == null) {
             throw new IllegalArgumentException("Cannot find email");
         }
         return foundMember;
@@ -63,24 +68,22 @@ public class MemberServiceImpl implements MemberService {
     @Override
     public Member loginPassword(LoginRequest loginRequest) {
         Member memberPassword = findMemberByEmail(loginRequest.getEmail());
-        if (! memberPassword.getPassword().equals(loginRequest.getPassword())) {
+        if (memberPassword == null || ! memberPassword.getPassword().equals(loginRequest.getPassword())) {
             throw new IllegalArgumentException("You have entered a wrong password");
         }
         return memberPassword;
     }
 
     @Override
-    public LoginResponse loginMember(LoginRequest loginRequest) {
+    public Member loginMember(LoginRequest loginRequest) {
         Member foundMember = findMemberByEmail(loginRequest.getEmail());
-        if (foundMember.getPassword().equals(loginRequest.getPassword())) {
-            LoginResponse logResponse = new LoginResponse();
-            logResponse.setRegMsg(logResponse.getRegMsg());
-            return logResponse;
-        }
-        else {
+        if (foundMember != null && foundMember.getPassword().equals(loginRequest.getPassword())) {
+            return foundMember;
+        } else {
             throw new IllegalArgumentException("Wrong password");
         }
     }
+
 
 
 
