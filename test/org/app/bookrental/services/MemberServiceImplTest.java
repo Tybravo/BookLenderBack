@@ -5,14 +5,12 @@ import org.app.bookrental.data.repositories.MemberRepository;
 import org.app.bookrental.dtos.requests.AddMemberRequest;
 import org.app.bookrental.dtos.requests.LoginRequest;
 import org.app.bookrental.dtos.responses.AddMemberResponse;
-import org.app.bookrental.dtos.responses.LoginResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.when;
 
 @SpringBootTest
 public class MemberServiceImplTest {
@@ -24,20 +22,19 @@ public class MemberServiceImplTest {
 
     @BeforeEach
     void setUp() {
-       //memberRepository.deleteAll();
+       memberRepository.deleteAll();
+
     }
 
     @Test
     public void test_To_Register_Save_Members() {
-        AddMemberRequest request = new AddMemberRequest();
-        Member member = new Member();
-        member.setFullName(request.getFullName());
+       Member member = new Member();
+        member.setFullName("Ade Bravo");
         member.setEmail("twinebravo@gmail.com");
         member.setPassword("tybravo");
-        member.setPhoneNumber(request.getPhoneNumber());
-        member.setAddress(request.getAddress());
+        member.setPhoneNumber("07032819318");
         AddMemberResponse response = memberService.registerMember(new AddMemberRequest());
-        //memberRepository.save(member);
+        memberRepository.save(member);
         response.setRegMsg("successfully registered");
         assertEquals(response.getRegMsg(), "successfully registered");
     }
@@ -45,9 +42,21 @@ public class MemberServiceImplTest {
     @Test
     public void test_That_Email_Already_Taken() {
         AddMemberRequest request = new AddMemberRequest();
+        request.setFullName("Adetayo Bravo");
         request.setEmail("twinebravo@gmail.com");
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
-            memberService.emailAlreadyExists(request);
+        request.setPassword("tybravo");
+        request.setPhoneNumber("08033664670");
+        AddMemberResponse response = memberService.registerMember(request);
+        assertEquals("Registration successful", response.getRegMsg());
+
+        Member member = new Member();
+        member.setFullName(request.getFullName());
+        member.setEmail(request.getEmail());
+        member.setPassword(request.getPassword());
+        member.setPhoneNumber(request.getPhoneNumber());
+        member.setAddress(request.getAddress());
+        memberRepository.save(member);
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {memberService.emailAlreadyExists(request);
         });
         assertEquals("Email is already taken", exception.getMessage());
     }
@@ -64,34 +73,80 @@ public class MemberServiceImplTest {
 
     @Test
     public void test_That_User_Cannot_Login_With_Wrong_Email() {
-        LoginRequest request = new LoginRequest();
-        request.setEmail("myemail@yahoo.com");
+        AddMemberRequest request = new AddMemberRequest();
+        request.setFullName("Adetayo Bravo");
+        request.setEmail("twinebravo@gmail.com");
+        request.setPassword("tybravo");
+        request.setPhoneNumber("08033664670");
+        AddMemberResponse response = memberService.registerMember(request);
+        assertEquals("Registration successful", response.getRegMsg());
+
+        Member member = new Member();
+        member.setFullName(request.getFullName());
+        member.setEmail(request.getEmail());
+        member.setPassword(request.getPassword());
+        member.setPhoneNumber(request.getPhoneNumber());
+        member.setAddress(request.getAddress());
+        memberRepository.save(member);
+
+        LoginRequest getRequest = new LoginRequest();
+        getRequest.setEmail("myemail@yahoo.com");
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
-            memberService.loginEmail(request);
+            memberService.loginEmail(getRequest);
         });
         assertEquals("Cannot find email", exception.getMessage());
     }
 
     @Test
     public void test_That_Password_Is_Wrong() {
-        LoginRequest request = new LoginRequest();
+        AddMemberRequest request = new AddMemberRequest();
+        request.setFullName("Adetayo Bravo");
+        request.setEmail("twinebravo@gmail.com");
         request.setPassword("tybravo");
+        request.setPhoneNumber("08033664670");
+        AddMemberResponse response = memberService.registerMember(request);
+        assertEquals("Registration successful", response.getRegMsg());
+
+        Member member = new Member();
+        member.setFullName(request.getFullName());
+        member.setEmail(request.getEmail());
+        member.setPassword(request.getPassword());
+        member.setPhoneNumber(request.getPhoneNumber());
+        member.setAddress(request.getAddress());
+        memberRepository.save(member);
+
+        LoginRequest getRequest = new LoginRequest();
+        getRequest.setPassword("tybravo");
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
-            memberService.loginPassword(request);
+            memberService.loginPassword(getRequest);
         });
         assertEquals("You have entered a wrong password", exception.getMessage());
     }
 
-
     @Test
     public void test_That_Password_Is_Correct() {
-        LoginRequest request = new LoginRequest();
+        AddMemberRequest request = new AddMemberRequest();
+        request.setFullName("Adetayo Bravo");
         request.setEmail("twinebravo@gmail.com");
         request.setPassword("tybravo");
-        Member response = memberService.loginMember(request);
-        assertEquals("tybravo", response.getPassword());
-    }
+        request.setPhoneNumber("08033664670");
+        AddMemberResponse response = memberService.registerMember(request);
+        assertEquals("Registration successful", response.getRegMsg());
 
+        Member member = new Member();
+        member.setFullName(request.getFullName());
+        member.setEmail(request.getEmail());
+        member.setPassword(request.getPassword());
+        member.setPhoneNumber(request.getPhoneNumber());
+        memberRepository.save(member);
+
+        LoginRequest loginRequest = new LoginRequest();
+        loginRequest.setEmail("twinebravo@gmail.com");
+        loginRequest.setPassword("tybravo");
+
+        Member getResponse = memberService.loginMember(loginRequest);
+        assertEquals("tybravo", getResponse.getPassword());
+    }
 
 }
 

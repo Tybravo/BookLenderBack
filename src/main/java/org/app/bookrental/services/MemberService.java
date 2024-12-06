@@ -11,16 +11,17 @@ public interface MemberService {
 
     Member findMemberByEmail(String emailAddy);
 
-    Member  emailAlreadyExists(AddMemberRequest addMemberRequest);
-
     AddMemberResponse registerMember(AddMemberRequest addMemberRequest);
 
-    AddMemberResponse emailCannotBeEmpty(AddMemberRequest addMemberRequest);
+    void emailAlreadyExists(AddMemberRequest addMemberRequest);
+
+    void emailCannotBeEmpty(AddMemberRequest addMemberRequest);
+
+    void loginEmail(LoginRequest loginRequest);
+
+    void loginPassword(LoginRequest loginRequest);
 
     Member loginMember(LoginRequest loginRequest);
 
-    Member loginEmail(LoginRequest loginRequest);
-
-    Member loginPassword(LoginRequest loginRequest);
 
 }
