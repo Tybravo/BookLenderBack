@@ -3,10 +3,9 @@ package org.app.booklender.dtos.responses;
 import lombok.Data;
 
 @Data
-public class LoginResponse {
+public class LogoutResponse {
     private String id;
     private String token;
 
-    private String regMsg = "Registration successful";
+    private String LogoutMsg = "Logged Out successfully";
 }
-

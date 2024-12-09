@@ -3,6 +3,7 @@ package org.app.booklender.services;
 import org.app.booklender.data.models.Member;
 import org.app.booklender.dtos.requests.LoginRequest;
 import org.app.booklender.dtos.requests.AddMemberRequest;
+import org.app.booklender.dtos.requests.LogoutRequest;
 import org.app.booklender.dtos.responses.AddMemberResponse;
 import org.springframework.stereotype.Service;
 
@@ -22,6 +23,8 @@ public interface MemberService {
     void loginPassword(LoginRequest loginRequest);
 
     Member loginMember(LoginRequest loginRequest);
+
+    void logoutMember(LogoutRequest logoutRequest);
 
 
 }
