@@ -2,6 +2,7 @@ package org.app.booklender.controllers;
 
 import org.app.booklender.dtos.requests.AddMemberRequest;
 import org.app.booklender.dtos.requests.LoginRequest;
+import org.app.booklender.dtos.requests.LogoutRequest;
 import org.app.booklender.dtos.responses.AddMemberResponse;
 import org.app.booklender.services.MemberService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,8 +29,32 @@ public class MemberController {
         }
     }
 
-    @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) {
+    @PostMapping("/login-email")
+    public ResponseEntity<?> loginMyEmail(@RequestBody LoginRequest loginRequest) {
+        try {
+            memberService.loginEmail(loginRequest);
+            return ResponseEntity.ok(memberService.loginEmail(loginRequest));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body("An unexpected error occurred");
+        }
+    }
+
+    @PostMapping("/login-password")
+    public ResponseEntity<?> loginMyPassword(@RequestBody LoginRequest loginRequest) {
+        try {
+            memberService.loginPassword(loginRequest);
+            return ResponseEntity.ok(memberService.loginPassword(loginRequest));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body("An unexpected error occurred");
+        }
+    }
+
+    @PostMapping("/login-member")
+    public ResponseEntity<?> loginMember(@RequestBody LoginRequest loginRequest) {
         try {
             memberService.loginEmail(loginRequest);
             memberService.loginPassword(loginRequest);
@@ -42,9 +67,15 @@ public class MemberController {
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<?> logout() {
-        // Implement logout logic if needed
-        return ResponseEntity.ok("Logout successful");
+    public ResponseEntity<?> logoutMember(@RequestBody LogoutRequest logoutRequest) {
+        try {
+            memberService.logoutMember(logoutRequest);
+            return ResponseEntity.ok("Logout successful");
+            } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body("An unexpected error occurred");
+        }
     }
 
     @GetMapping("/search")

@@ -17,6 +17,4 @@ public class Member {
     private String phoneNumber;
     private String address;
     private LocalDateTime creationDate = LocalDateTime.now();
-
-    private String testemail;
 }

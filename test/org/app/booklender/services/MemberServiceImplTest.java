@@ -1,6 +1,5 @@
 package org.app.booklender.services;
 
-import lombok.val;
 import org.app.booklender.data.models.Member;
 import org.app.booklender.data.repositories.MemberRepository;
 import org.app.booklender.dtos.requests.AddMemberRequest;
@@ -86,7 +85,7 @@ public class MemberServiceImplTest {
     }
 
     @Test
-    public void test_That_Password_Is_Wrong() {
+    public void test_That_User_Cannot_Login_With_Wrong_Password() {
         AddMemberRequest addMemberRequest = new AddMemberRequest();
         addMemberRequest.setFullName("Ade Bravo");
         addMemberRequest.setEmail("twinebravo@gmail.com");
@@ -104,7 +103,7 @@ public class MemberServiceImplTest {
     }
 
     @Test
-    public void test_That_Password_Is_Correct() {
+    public void test_That_Email_And_Password_Are_Correct() {
         AddMemberRequest addMemberRequest = new AddMemberRequest();
         addMemberRequest.setFullName("Ade Bravo");
         addMemberRequest.setEmail("twinebravo@gmail.com");
@@ -125,7 +124,7 @@ public class MemberServiceImplTest {
 
     @Test
     public void test_LogoutMember_Success() {
-        // Arrange
+        //Given
         AddMemberRequest addMemberRequest = new AddMemberRequest();
         addMemberRequest.setFullName("Ade Bravo");
         addMemberRequest.setEmail("twinebravo@gmail.com");
@@ -142,16 +141,15 @@ public class MemberServiceImplTest {
         LogoutRequest logoutRequest = new LogoutRequest();
         logoutRequest.setEmail("twinebravo@gmail.com");
 
-        // Act
+        // When
         memberService.logoutMember(logoutRequest);
 
         // Assert
         try {
-            session.getId(); // Attempt to access session ID after invalidation
+            session.getId();
             Assertions.assertFalse(false);
 
-        } catch (IllegalStateException e) {
-            // Expected exception, session is invalidated
+        } catch (IllegalStateException ignored) {
         }
     }
 

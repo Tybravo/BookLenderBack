@@ -8,6 +8,7 @@ import org.app.booklender.dtos.requests.AddMemberRequest;
 import org.app.booklender.dtos.requests.LoginRequest;
 import org.app.booklender.dtos.requests.LogoutRequest;
 import org.app.booklender.dtos.responses.AddMemberResponse;
+import org.app.booklender.dtos.responses.LoginResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.context.request.RequestAttributes;
@@ -65,22 +66,30 @@ public class MemberServiceImpl implements MemberService {
             emailAlreadyExists(addMemberRequest);
             regResponse.setRegMsg("Email is already taken");
         }
-
         return regResponse;
     }
 
     @Override
-    public void loginEmail(LoginRequest loginRequest) {
-        Member foundMember = findMemberByEmail(loginRequest.getEmail());
-        if (foundMember == null) {
+    public LoginResponse loginEmail(LoginRequest loginRequest) {
+        Member foundMemberEmail = findMemberByEmail(loginRequest.getEmail());
+      if(foundMemberEmail != null && (foundMemberEmail.getEmail().equals(loginRequest.getEmail()) )){
+            LoginResponse regResponse = new LoginResponse();
+            regResponse.setId(foundMemberEmail.getId());
+            regResponse.setRegMsg("Email Login successful");
+          return regResponse;
+        } else{
             throw new IllegalArgumentException("Cannot find email");
         }
     }
 
     @Override
-    public void loginPassword(LoginRequest loginRequest) {
-        Member memberPassword = findMemberByEmail(loginRequest.getEmail());
-        if (memberPassword == null || ! memberPassword.getPassword().equals(loginRequest.getPassword())) {
+    public Member loginPassword(LoginRequest loginRequest) {
+        Member foundMemberPassword = findMemberByEmail(loginRequest.getEmail());
+        if(foundMemberPassword != null && (foundMemberPassword.getPassword().equals(loginRequest.getPassword()) )){
+            AddMemberResponse regResponse = new AddMemberResponse();
+            regResponse.setRegMsg("Member Login successful");
+            return foundMemberPassword;
+            } else{
             throw new IllegalArgumentException("You have entered a wrong password");
         }
     }
@@ -89,7 +98,9 @@ public class MemberServiceImpl implements MemberService {
     public Member loginMember(LoginRequest loginRequest) {
         loginPassword(loginRequest);
         Member foundMember = findMemberByEmail(loginRequest.getEmail());
-        if (foundMember != null && foundMember.getPassword().equals(loginRequest.getPassword())) {
+        if (foundMember != null && (foundMember.getPassword().equals(loginRequest.getPassword()) )) {
+            AddMemberResponse regResponse = new AddMemberResponse();
+            regResponse.setRegMsg("Member Login successful");
             return foundMember;
         } else {
             throw new IllegalArgumentException("Wrong password");
