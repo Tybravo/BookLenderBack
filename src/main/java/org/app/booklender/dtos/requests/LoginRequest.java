@@ -7,4 +7,5 @@ public class LoginRequest {
     private String id;
     private String email;
     private String password;
+    private Boolean sessionStatus = false;
 }

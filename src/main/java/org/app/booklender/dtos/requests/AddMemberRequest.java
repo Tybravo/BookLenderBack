@@ -10,7 +10,6 @@ public class AddMemberRequest {
     private String password;
     private String phoneNumber;
     private String address;
-
-    private String testemail;
+    private boolean sessionStatus = false;
 }
 

@@ -1,7 +1,5 @@
 package org.app.booklender.services;
 
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpSession;
 import org.app.booklender.data.models.Member;
 import org.app.booklender.data.repositories.MemberRepository;
 import org.app.booklender.dtos.requests.AddMemberRequest;
@@ -9,17 +7,14 @@ import org.app.booklender.dtos.requests.LoginRequest;
 import org.app.booklender.dtos.requests.LogoutRequest;
 import org.app.booklender.dtos.responses.AddMemberResponse;
 import org.app.booklender.dtos.responses.LoginResponse;
+import org.app.booklender.dtos.responses.LogoutResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.web.context.request.RequestAttributes;
-import org.springframework.web.context.request.RequestContextHolder;
-import org.springframework.web.context.request.ServletRequestAttributes;
 
 @Service
 public class MemberServiceImpl implements MemberService {
     @Autowired
     private MemberRepository memberRepository;
-
 
     @Override
     public Member findMemberByEmail(String emailAddy) {
@@ -70,11 +65,28 @@ public class MemberServiceImpl implements MemberService {
     }
 
     @Override
+    public Member loginSession(LoginRequest loginRequest) {
+        Member getMemberStatus = findMemberByEmail(loginRequest.getEmail());
+        if (getMemberStatus != null) {
+            if (getMemberStatus.isSessionStatus()) {
+                throw new IllegalArgumentException("You are already in session");
+            } else {
+                getMemberStatus.setSessionStatus(true);
+                memberRepository.save(getMemberStatus);
+            }
+        }
+        return getMemberStatus;
+    }
+
+    @Override
     public LoginResponse loginEmail(LoginRequest loginRequest) {
+        //loginSession(loginRequest);
         Member foundMemberEmail = findMemberByEmail(loginRequest.getEmail());
       if(foundMemberEmail != null && (foundMemberEmail.getEmail().equals(loginRequest.getEmail()) )){
-            LoginResponse regResponse = new LoginResponse();
+          //foundMemberEmail.setSessionStatus(true);
+          LoginResponse regResponse = new LoginResponse();
             regResponse.setId(foundMemberEmail.getId());
+            regResponse.setSessionStatus(foundMemberEmail.isSessionStatus());
             regResponse.setRegMsg("Email Login successful");
           return regResponse;
         } else{
@@ -83,23 +95,32 @@ public class MemberServiceImpl implements MemberService {
     }
 
     @Override
-    public Member loginPassword(LoginRequest loginRequest) {
+    public LoginResponse loginPassword(LoginRequest loginRequest) {
         Member foundMemberPassword = findMemberByEmail(loginRequest.getEmail());
         if(foundMemberPassword != null && (foundMemberPassword.getPassword().equals(loginRequest.getPassword()) )){
-            AddMemberResponse regResponse = new AddMemberResponse();
-            regResponse.setRegMsg("Member Login successful");
-            return foundMemberPassword;
-            } else{
+            loginSession(loginRequest);
+            foundMemberPassword.setSessionStatus(true);
+            LoginResponse regResponse = new LoginResponse();
+            regResponse.setId(foundMemberPassword.getId());
+            regResponse.setRegMsg("Correct password! Member Login successful");
+            return regResponse;
+            }
+        if(loginRequest.getPassword() == null || loginRequest.getPassword().isEmpty()) {
+            throw new IllegalArgumentException("Password cannot be empty");
+        } else{
             throw new IllegalArgumentException("You have entered a wrong password");
         }
     }
 
     @Override
     public Member loginMember(LoginRequest loginRequest) {
-        loginPassword(loginRequest);
         Member foundMember = findMemberByEmail(loginRequest.getEmail());
-        if (foundMember != null && (foundMember.getPassword().equals(loginRequest.getPassword()) )) {
-            AddMemberResponse regResponse = new AddMemberResponse();
+
+        if (foundMember != null && foundMember.getPassword().equals(loginRequest.getPassword())) {
+            loginSession(loginRequest);
+            foundMember.setSessionStatus(true);
+            LoginResponse regResponse = new LoginResponse();
+            regResponse.setId(foundMember.getId());
             regResponse.setRegMsg("Member Login successful");
             return foundMember;
         } else {
@@ -107,30 +128,39 @@ public class MemberServiceImpl implements MemberService {
         }
     }
 
+
     @Override
-    public void logoutMember(LogoutRequest logoutRequest) {
+    public LogoutResponse logoutMember(LogoutRequest logoutRequest) {
         Member foundMember = findMemberByEmail(logoutRequest.getEmail());
         if (foundMember != null) {
-            HttpServletRequest request = getCurrentHttpRequest();
-            invalidateSession(request);
-        } else {
-            throw new IllegalArgumentException("Email not found");
+           if(!foundMember.isSessionStatus()){
+               throw new IllegalArgumentException("You are currently out of session");
+           }
+           foundMember.setSessionStatus(false);
+               memberRepository.save(foundMember);
+               LogoutResponse outSession = new LogoutResponse();
+               outSession.setEmail(logoutRequest.getEmail());
+               outSession.setLogoutMsg("Logged out successfully");
+               return outSession;
+           } else {
+            throw new IllegalArgumentException("Member does not exist");
         }
     }
 
-    public void invalidateSession(HttpServletRequest request) {
-        HttpSession session = request.getSession(false);
-        if (session != null) {
-            session.invalidate();
-        }
-    }
 
-    private HttpServletRequest getCurrentHttpRequest() {
-        RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
-        if (requestAttributes instanceof ServletRequestAttributes) {
-            return ((ServletRequestAttributes) requestAttributes).getRequest();
-        }
-        throw new IllegalStateException("No current HTTP request found");
-    }
+//    public void invalidateSession(HttpServletRequest request) {
+//        HttpSession session = (HttpSession) request.getSession(false);
+//        if (session != null) {
+//            session.invalidate();
+//        }
+//    }
+//
+//    private HttpServletRequest getCurrentHttpRequest() {
+//        RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
+//        if (requestAttributes instanceof ServletRequestAttributes) {
+//            return ((ServletRequestAttributes) requestAttributes).getRequest();
+//        }
+//        throw new IllegalStateException("No current HTTP request found");
+//    }
 
 }

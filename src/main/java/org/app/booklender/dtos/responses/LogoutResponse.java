@@ -6,6 +6,7 @@ import lombok.Data;
 public class LogoutResponse {
     private String id;
     private String token;
+    private String email;
 
-    private String LogoutMsg = "Logged Out successfully";
+    private String LogoutMsg;
 }

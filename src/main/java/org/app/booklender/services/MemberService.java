@@ -6,6 +6,7 @@ import org.app.booklender.dtos.requests.AddMemberRequest;
 import org.app.booklender.dtos.requests.LogoutRequest;
 import org.app.booklender.dtos.responses.AddMemberResponse;
 import org.app.booklender.dtos.responses.LoginResponse;
+import org.app.booklender.dtos.responses.LogoutResponse;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -19,13 +20,14 @@ public interface MemberService {
 
     void emailCannotBeEmpty(AddMemberRequest addMemberRequest);
 
+    Member loginSession(LoginRequest loginRequest);
+
     LoginResponse loginEmail(LoginRequest loginRequest);
 
-    Member loginPassword(LoginRequest loginRequest);
+    LoginResponse loginPassword(LoginRequest loginRequest);
 
     Member loginMember(LoginRequest loginRequest);
 
-    void logoutMember(LogoutRequest logoutRequest);
-
+    LogoutResponse logoutMember(LogoutRequest logoutRequest);
 
 }
