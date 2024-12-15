@@ -14,7 +14,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class MemberServiceImpl implements MemberService {
     @Autowired
-    private MemberRepository memberRepository;
+    MemberRepository memberRepository;
 
     @Override
     public Member findMemberByEmail(String emailAddy) {
@@ -96,20 +96,23 @@ public class MemberServiceImpl implements MemberService {
 
     @Override
     public LoginResponse loginPassword(LoginRequest loginRequest) {
-        Member foundMemberPassword = findMemberByEmail(loginRequest.getEmail());
-        if(foundMemberPassword != null && (foundMemberPassword.getPassword().equals(loginRequest.getPassword()) )){
-            loginSession(loginRequest);
-            foundMemberPassword.setSessionStatus(true);
-            LoginResponse regResponse = new LoginResponse();
-            regResponse.setId(foundMemberPassword.getId());
-            regResponse.setRegMsg("Correct password! Member Login successful");
-            return regResponse;
+            Member foundMemberPassword = findMemberByEmail(loginRequest.getEmail());
+            if (foundMemberPassword != null && (foundMemberPassword.getPassword().equals(loginRequest.getPassword()))) {
+                //loginSession(loginRequest);
+                foundMemberPassword.setSessionStatus(true);
+                memberRepository.save(foundMemberPassword);
+                LoginResponse regResponse = new LoginResponse();
+                regResponse.setId(foundMemberPassword.getId());
+                regResponse.setSessionStatus(foundMemberPassword.isSessionStatus());
+                regResponse.setRegMsg("Correct password! Member Login successful");
+                loginSession(loginRequest);
+                return regResponse;
             }
-        if(loginRequest.getPassword() == null || loginRequest.getPassword().isEmpty()) {
-            throw new IllegalArgumentException("Password cannot be empty");
-        } else{
-            throw new IllegalArgumentException("You have entered a wrong password");
-        }
+            if (loginRequest.getPassword() == null || loginRequest.getPassword().isEmpty()) {
+                throw new IllegalArgumentException("Password cannot be empty");
+            } else {
+                throw new IllegalArgumentException("You have entered a wrong password");
+            }
     }
 
     @Override

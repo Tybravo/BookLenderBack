@@ -8,6 +8,7 @@ import org.springframework.stereotype.Repository;
 public interface MemberRepository extends MongoRepository<Member, String> {
     Member findByEmail(String emailAddy);
     Member findByPassword(String password);
+    Member findBySessionStatus(Boolean sessionStatus);
 
     //Optional<Member> findByEmail(String email);
 
