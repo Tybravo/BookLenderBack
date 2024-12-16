@@ -53,6 +53,18 @@ public class MemberController {
         }
     }
 
+    @PostMapping("/already-in-session")
+    public ResponseEntity<?> alreadyInSession(@RequestBody LoginRequest loginRequest) {
+        try {
+            memberService.alreadyInSession(loginRequest);
+            return ResponseEntity.ok(memberService);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body("An unexpected error occurred");
+        }
+    }
+
     @PostMapping("/login-member")
     public ResponseEntity<?> loginMember(@RequestBody LoginRequest loginRequest) {
         try {

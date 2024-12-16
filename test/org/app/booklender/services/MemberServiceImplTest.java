@@ -144,8 +144,11 @@ public class MemberServiceImplTest {
         loginRequest.setEmail("twinebravo@gmail.com");
         loginRequest.setPassword("tybravo");
 
+        LoginResponse getResponse1 = memberService.loginEmail(loginRequest);
         LoginResponse getResponse = memberService.loginPassword(loginRequest);
+        assertEquals("Email Login successful", getResponse1.getRegMsg());
         assertEquals("Correct password! Member Login successful", getResponse.getRegMsg());
+
     }
 
     @Test
@@ -174,7 +177,7 @@ public class MemberServiceImplTest {
     }
 
     @Test
-    public void test_That_Login_Session_Is_Validated() {
+    public void test_That_Already_Login_Session_Is_Validated() {
         AddMemberRequest addMemberRequest = new AddMemberRequest();
         addMemberRequest.setFullName("Ade Bravo");
         addMemberRequest.setEmail("twinebravo@gmail.com");
@@ -189,7 +192,7 @@ public class MemberServiceImplTest {
         loginRequest.setEmail("twinebravo@gmail.com");
         loginRequest.setSessionStatus(true);
 
-        Member getResponse = memberService.loginSession(loginRequest);
+        Member getResponse = memberService.alreadyInSession(loginRequest);
         assertEquals("twinebravo@gmail.com", getResponse.getEmail());
         assertTrue(getResponse.isSessionStatus(), String.valueOf(true));
     }
@@ -215,9 +218,9 @@ public class MemberServiceImplTest {
         assertEquals("twinebravo@gmail.com", getResponse.getEmail());
         assertEquals("tybravo", getResponse.getPassword());
 
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () ->
-                memberService.loginSession(loginRequest));
-        assertEquals("You are already in session", exception.getMessage());
+//        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () ->
+//                memberService.alreadyInSession(loginRequest));
+//        assertEquals("You are already in session", exception.getMessage());
     }
 
     @Test

@@ -8,6 +8,7 @@ public class LoginResponse {
     private String email;
     private String password;
     private String regMsg;
+    private String logMsg;
 
     private Boolean sessionStatus;
 }

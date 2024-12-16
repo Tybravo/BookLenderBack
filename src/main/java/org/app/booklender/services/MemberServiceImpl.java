@@ -65,25 +65,9 @@ public class MemberServiceImpl implements MemberService {
     }
 
     @Override
-    public Member loginSession(LoginRequest loginRequest) {
-        Member getMemberStatus = findMemberByEmail(loginRequest.getEmail());
-        if (getMemberStatus != null) {
-            if (getMemberStatus.isSessionStatus()) {
-                throw new IllegalArgumentException("You are already in session");
-            } else {
-                getMemberStatus.setSessionStatus(true);
-                memberRepository.save(getMemberStatus);
-            }
-        }
-        return getMemberStatus;
-    }
-
-    @Override
     public LoginResponse loginEmail(LoginRequest loginRequest) {
-        //loginSession(loginRequest);
         Member foundMemberEmail = findMemberByEmail(loginRequest.getEmail());
       if(foundMemberEmail != null && (foundMemberEmail.getEmail().equals(loginRequest.getEmail()) )){
-          //foundMemberEmail.setSessionStatus(true);
           LoginResponse regResponse = new LoginResponse();
             regResponse.setId(foundMemberEmail.getId());
             regResponse.setSessionStatus(foundMemberEmail.isSessionStatus());
@@ -98,15 +82,13 @@ public class MemberServiceImpl implements MemberService {
     public LoginResponse loginPassword(LoginRequest loginRequest) {
             Member foundMemberPassword = findMemberByEmail(loginRequest.getEmail());
             if (foundMemberPassword != null && (foundMemberPassword.getPassword().equals(loginRequest.getPassword()))) {
-                //loginSession(loginRequest);
                 foundMemberPassword.setSessionStatus(true);
                 memberRepository.save(foundMemberPassword);
                 LoginResponse regResponse = new LoginResponse();
                 regResponse.setId(foundMemberPassword.getId());
                 regResponse.setSessionStatus(foundMemberPassword.isSessionStatus());
                 regResponse.setRegMsg("Correct password! Member Login successful");
-                loginSession(loginRequest);
-                return regResponse;
+                 return regResponse;
             }
             if (loginRequest.getPassword() == null || loginRequest.getPassword().isEmpty()) {
                 throw new IllegalArgumentException("Password cannot be empty");
@@ -116,18 +98,35 @@ public class MemberServiceImpl implements MemberService {
     }
 
     @Override
+    public Member alreadyInSession(LoginRequest loginRequest) {
+        Member getMemberStatus = findMemberByEmail(loginRequest.getEmail());
+        if (getMemberStatus != null) {
+            if (getMemberStatus.isSessionStatus()) {
+                LoginResponse regResponse = new LoginResponse();
+                regResponse.setId(getMemberStatus.getId());
+                regResponse.setRegMsg("Already in session");
+                return getMemberStatus;
+            } else {
+                getMemberStatus.setSessionStatus(true);
+                memberRepository.save(getMemberStatus);
+            }
+        }
+        return getMemberStatus;
+    }
+
+    @Override
     public Member loginMember(LoginRequest loginRequest) {
         Member foundMember = findMemberByEmail(loginRequest.getEmail());
 
         if (foundMember != null && foundMember.getPassword().equals(loginRequest.getPassword())) {
-            loginSession(loginRequest);
             foundMember.setSessionStatus(true);
+            memberRepository.save(foundMember);
             LoginResponse regResponse = new LoginResponse();
             regResponse.setId(foundMember.getId());
             regResponse.setRegMsg("Member Login successful");
             return foundMember;
         } else {
-            throw new IllegalArgumentException("Wrong password");
+            throw new IllegalArgumentException("Wrong password entered");
         }
     }
 
@@ -149,6 +148,7 @@ public class MemberServiceImpl implements MemberService {
             throw new IllegalArgumentException("Member does not exist");
         }
     }
+
 
 
 //    public void invalidateSession(HttpServletRequest request) {

@@ -20,7 +20,7 @@ public interface MemberService {
 
     void emailCannotBeEmpty(AddMemberRequest addMemberRequest);
 
-    Member loginSession(LoginRequest loginRequest);
+    Member alreadyInSession(LoginRequest loginRequest);
 
     LoginResponse loginEmail(LoginRequest loginRequest);
 
