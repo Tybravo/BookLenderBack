@@ -57,7 +57,7 @@ public class MemberController {
     public ResponseEntity<?> alreadyInSession(@RequestBody LoginRequest loginRequest) {
         try {
             memberService.alreadyInSession(loginRequest);
-            return ResponseEntity.ok(memberService);
+            return ResponseEntity.ok(memberService.alreadyInSession(loginRequest));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         } catch (Exception e) {
@@ -68,8 +68,7 @@ public class MemberController {
     @PostMapping("/login-member")
     public ResponseEntity<?> loginMember(@RequestBody LoginRequest loginRequest) {
         try {
-            memberService.loginEmail(loginRequest);
-            memberService.loginPassword(loginRequest);
+            memberService.loginMember(loginRequest);
             return ResponseEntity.ok(memberService.loginMember(loginRequest));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
@@ -82,7 +81,7 @@ public class MemberController {
     public ResponseEntity<?> logoutMember(@RequestBody LogoutRequest logoutRequest) {
         try {
             memberService.logoutMember(logoutRequest);
-            return ResponseEntity.ok("Logout successful");
+            return ResponseEntity.ok("Logout successful!");
             } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         } catch (Exception e) {

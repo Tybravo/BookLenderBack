@@ -106,7 +106,7 @@ public class MemberServiceImplTest {
         getRequest.setSessionStatus(false);
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () ->
                 memberService.loginPassword(getRequest));
-        assertEquals("You have entered a wrong password", exception.getMessage());
+        assertEquals("You have entered a wrong password or missing email", exception.getMessage());
     }
 
     @Test
@@ -125,7 +125,7 @@ public class MemberServiceImplTest {
         loginRequest.setEmail("twinebravo@gmail.com");
 
         LoginResponse getResponse = memberService.loginEmail(loginRequest);
-        assertEquals("Email Login successful", getResponse.getRegMsg());
+        assertEquals("Email Login successful", getResponse.getLogMsg());
     }
 
     @Test
@@ -146,8 +146,8 @@ public class MemberServiceImplTest {
 
         LoginResponse getResponse1 = memberService.loginEmail(loginRequest);
         LoginResponse getResponse = memberService.loginPassword(loginRequest);
-        assertEquals("Email Login successful", getResponse1.getRegMsg());
-        assertEquals("Correct password! Member Login successful", getResponse.getRegMsg());
+        assertEquals("Email Login successful", getResponse1.getLogMsg());
+        assertEquals("Correct password! Member Login successful", getResponse.getLogMsg());
 
     }
 
@@ -177,6 +177,28 @@ public class MemberServiceImplTest {
     }
 
     @Test
+    public void test_That_Already_Login_Session_Is_Not_Validated() {
+        AddMemberRequest addMemberRequest = new AddMemberRequest();
+        addMemberRequest.setFullName("Ade Bravo");
+        addMemberRequest.setEmail("twinebravo@gmail.com");
+        addMemberRequest.setPassword("tybravo");
+        addMemberRequest.setPhoneNumber("07032819318");
+        addMemberRequest.setAddress("No. 34, Sabo, Yaba, Lagos.");
+        addMemberRequest.setSessionStatus(false);
+        AddMemberResponse response = memberService.registerMember(addMemberRequest);
+        assertEquals("Registration successful", response.getRegMsg());
+
+        LoginRequest loginRequest = new LoginRequest();
+        loginRequest.setEmail("twinebravo@gmail.com");
+        loginRequest.setPassword("tybravo");
+        loginRequest.setSessionStatus(false);
+
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () ->
+                memberService.alreadyInSession(loginRequest));
+        assertEquals("Not in session! You accidentally miss your way", exception.getMessage());
+    }
+
+    @Test
     public void test_That_Already_Login_Session_Is_Validated() {
         AddMemberRequest addMemberRequest = new AddMemberRequest();
         addMemberRequest.setFullName("Ade Bravo");
@@ -190,12 +212,18 @@ public class MemberServiceImplTest {
 
         LoginRequest loginRequest = new LoginRequest();
         loginRequest.setEmail("twinebravo@gmail.com");
+        loginRequest.setPassword("tybravo");
         loginRequest.setSessionStatus(true);
 
-        Member getResponse = memberService.alreadyInSession(loginRequest);
+        Member getResponse = memberService.loginMember(loginRequest);
         assertEquals("twinebravo@gmail.com", getResponse.getEmail());
-        assertTrue(getResponse.isSessionStatus(), String.valueOf(true));
+        assertEquals("tybravo", getResponse.getPassword());
+
+        Member getResponse2 = memberService.alreadyInSession(loginRequest);
+        assertEquals("twinebravo@gmail.com", getResponse2.getEmail());
+        assertTrue(getResponse2.isSessionStatus(), String.valueOf(true));
     }
+
 
     @Test
     public void test_That_Login_Session_Is_Currently_Running_And_Cannot_Login_Again() {
@@ -217,10 +245,6 @@ public class MemberServiceImplTest {
         Member getResponse = memberService.loginMember(loginRequest);
         assertEquals("twinebravo@gmail.com", getResponse.getEmail());
         assertEquals("tybravo", getResponse.getPassword());
-
-//        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () ->
-//                memberService.alreadyInSession(loginRequest));
-//        assertEquals("You are already in session", exception.getMessage());
     }
 
     @Test

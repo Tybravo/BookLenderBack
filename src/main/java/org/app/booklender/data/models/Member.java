@@ -16,6 +16,9 @@ public class Member {
     private String password;
     private String phoneNumber;
     private String address;
+    private String statusMsg;
+    private String regMsg;
+    private String logMsg;
     private boolean sessionStatus = false;
     private LocalDateTime creationDate = LocalDateTime.now();
 }

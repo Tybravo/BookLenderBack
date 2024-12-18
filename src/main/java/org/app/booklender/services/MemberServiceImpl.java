@@ -28,8 +28,11 @@ public class MemberServiceImpl implements MemberService {
         addMemberRequest.getFullName() == null || addMemberRequest.getFullName().isEmpty() ||
         addMemberRequest.getPhoneNumber() == null || addMemberRequest.getPhoneNumber().isEmpty() ||
         addMemberRequest.getAddress() == null || addMemberRequest.getAddress().isEmpty() ||
-        addMemberRequest.getPassword().length() > 8 || !addMemberRequest.getEmail().contains("@")) {
+        addMemberRequest.getPassword().length() > 8 ) {
             throw new IllegalArgumentException("Registration Fields cannot be empty");
+        }
+        if(!addMemberRequest.getEmail().contains("@") || !addMemberRequest.getEmail().contains(".") || !addMemberRequest.getEmail().contains("com")) {
+            throw new IllegalArgumentException("You forgot to include a character in Email");
         }
     }
 
@@ -57,6 +60,12 @@ public class MemberServiceImpl implements MemberService {
             member.setAddress(addMemberRequest.getAddress());
             memberRepository.save(member);
             regResponse.setRegMsg("Registration successful");
+            regResponse.setFullName(addMemberRequest.getFullName());
+            regResponse.setEmail(addMemberRequest.getEmail());
+            regResponse.setPhoneNumber(addMemberRequest.getPhoneNumber());
+            regResponse.setAddress(addMemberRequest.getAddress());
+            regResponse.setCreationDate(addMemberRequest.getCreationDate());
+            regResponse.setSessionStatus(addMemberRequest.isSessionStatus());
         } else {
             emailAlreadyExists(addMemberRequest);
             regResponse.setRegMsg("Email is already taken");
@@ -70,8 +79,9 @@ public class MemberServiceImpl implements MemberService {
       if(foundMemberEmail != null && (foundMemberEmail.getEmail().equals(loginRequest.getEmail()) )){
           LoginResponse regResponse = new LoginResponse();
             regResponse.setId(foundMemberEmail.getId());
+            regResponse.setEmail(foundMemberEmail.getEmail());
             regResponse.setSessionStatus(foundMemberEmail.isSessionStatus());
-            regResponse.setRegMsg("Email Login successful");
+            regResponse.setLogMsg("Email Login successful");
           return regResponse;
         } else{
             throw new IllegalArgumentException("Cannot find email");
@@ -86,50 +96,55 @@ public class MemberServiceImpl implements MemberService {
                 memberRepository.save(foundMemberPassword);
                 LoginResponse regResponse = new LoginResponse();
                 regResponse.setId(foundMemberPassword.getId());
+                regResponse.setEmail(foundMemberPassword.getEmail());
                 regResponse.setSessionStatus(foundMemberPassword.isSessionStatus());
-                regResponse.setRegMsg("Correct password! Member Login successful");
+                regResponse.setLogMsg("Correct password! Member Login successful");
                  return regResponse;
             }
             if (loginRequest.getPassword() == null || loginRequest.getPassword().isEmpty()) {
                 throw new IllegalArgumentException("Password cannot be empty");
             } else {
-                throw new IllegalArgumentException("You have entered a wrong password");
+                throw new IllegalArgumentException("You have entered a wrong password or missing email");
             }
     }
 
     @Override
     public Member alreadyInSession(LoginRequest loginRequest) {
         Member getMemberStatus = findMemberByEmail(loginRequest.getEmail());
+        if(getMemberStatus != null && !getMemberStatus.isSessionStatus()){
+            throw new IllegalArgumentException("Not in session! You accidentally miss your way");
+        }
         if (getMemberStatus != null) {
-            if (getMemberStatus.isSessionStatus()) {
-                LoginResponse regResponse = new LoginResponse();
-                regResponse.setId(getMemberStatus.getId());
-                regResponse.setRegMsg("Already in session");
-                return getMemberStatus;
-            } else {
+            if (loginRequest.getEmail().equals(getMemberStatus.getEmail()) &&
+                    loginRequest.getPassword().equals(getMemberStatus.getPassword()) ) {
                 getMemberStatus.setSessionStatus(true);
                 memberRepository.save(getMemberStatus);
+                getMemberStatus.setStatusMsg("Already in session");
             }
         }
-        return getMemberStatus;
+            return getMemberStatus;
     }
+
 
     @Override
     public Member loginMember(LoginRequest loginRequest) {
         Member foundMember = findMemberByEmail(loginRequest.getEmail());
 
-        if (foundMember != null && foundMember.getPassword().equals(loginRequest.getPassword())) {
+        if(loginRequest.getEmail() == null || loginRequest.getEmail().isEmpty() ||
+                loginRequest.getPassword() == null || loginRequest.getPassword().isEmpty()) {
+            throw new IllegalArgumentException("Email or password cannot be empty");
+        }
+        if (foundMember != null && foundMember.getEmail().equals(loginRequest.getEmail()) &&
+                loginRequest.getPassword().equals(foundMember.getPassword())) {
             foundMember.setSessionStatus(true);
             memberRepository.save(foundMember);
-            LoginResponse regResponse = new LoginResponse();
-            regResponse.setId(foundMember.getId());
-            regResponse.setRegMsg("Member Login successful");
+            foundMember.setId(foundMember.getId());
+            foundMember.setLogMsg("Member Login successful");
             return foundMember;
         } else {
-            throw new IllegalArgumentException("Wrong password entered");
+            throw new IllegalArgumentException("Wrong email or password entered");
         }
     }
-
 
     @Override
     public LogoutResponse logoutMember(LogoutRequest logoutRequest) {
@@ -149,21 +164,5 @@ public class MemberServiceImpl implements MemberService {
         }
     }
 
-
-
-//    public void invalidateSession(HttpServletRequest request) {
-//        HttpSession session = (HttpSession) request.getSession(false);
-//        if (session != null) {
-//            session.invalidate();
-//        }
-//    }
-//
-//    private HttpServletRequest getCurrentHttpRequest() {
-//        RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
-//        if (requestAttributes instanceof ServletRequestAttributes) {
-//            return ((ServletRequestAttributes) requestAttributes).getRequest();
-//        }
-//        throw new IllegalStateException("No current HTTP request found");
-//    }
-
 }
+
